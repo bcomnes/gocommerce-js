@@ -56,6 +56,10 @@ function pathWithQuery(path, params) {
   return path;
 }
 
+function parseSearchString (q) {
+  return {q: q.split(' ').filter(val => val).join('+')};
+}
+
 export default class GoCommerce {
   constructor(options) {
     if (!options.APIUrl) {
@@ -317,6 +321,17 @@ export default class GoCommerce {
     })).then(({items, pagination}) => ({orders: items, pagination}));
   }
 
+  searchOrders (q, opts = {}) {
+    const params = Object.assign({
+      // order: 'desc'
+      // sort: 'date'
+    }, parseSearchString(q), opts)
+    const path = pathWithQuery("/search/orders", params)
+    return this.authHeaders(true).then((headers) => this.api.request(path, {
+      headers
+    })).then(({items, pagination}) => ({orders: items, pagination}))
+  }
+
   orderDetails(orderID) {
       return this.authHeaders(true).then((headers) => this.api.request(`/orders/${orderID}`, {
         headers
@@ -355,6 +370,17 @@ export default class GoCommerce {
     return this.authHeaders(true).then((headers) => this.api.request(path, {
       headers
     })).then(({items, pagination}) => ({users: items, pagination}));
+  }
+
+  searchUsers(q, opts) {
+    const params = Object.assign({
+      // order: 'desc'
+      // sort: 'name'
+    }, parseSearchString(q), opts)
+    const path = pathWithQuery("/search/orders", params)
+    return this.authHeaders(true).then((headers) => this.api.request(path, {
+      headers
+    })).then(({items, pagination}) => ({users: items, pagination}))
   }
 
   report(name, params) {
